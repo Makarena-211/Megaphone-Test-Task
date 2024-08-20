@@ -1,7 +1,6 @@
 import asyncio
 import logging
 import random
-import sqlite3
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
