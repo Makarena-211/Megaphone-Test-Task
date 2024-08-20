@@ -1,8 +1,21 @@
 import asyncio
 import logging
+from datetime import datetime
+import sqlite3
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+conn = sqlite3.connect('requests.db')
+cursor  = conn.cursor()
+cursor.execute('''
+        CREATE TABLE IF NOT EXISTS requests(
+               id INTEGER PRIMARY KEY AUTOINCREMENT,
+               client_addr TEXT, 
+               message TEXT,
+               recieved_at TEXT)
+               ''')
+conn.commit()
 
 async def handle_client(reader, writer):
     addr = writer.get_extra_info('peername')
@@ -14,8 +27,11 @@ async def handle_client(reader, writer):
             break
         
         try:
-            message = data.decode()
+            message = data.decode('utf-8')
             logger.info(f"Received {message} from {addr}")
+
+            cursor.execute('''INSERT INTO requests (client_addr, message, recieved_at) VALUES (?, ?, ?)''', (str(addr), message, datetime.now().isoformat()))
+            conn.commit()
 
             writer.write(data)
             await writer.drain()
@@ -38,3 +54,4 @@ async def run_server():
 
 if __name__ == '__main__':
     asyncio.run(run_server())
+    conn.close()

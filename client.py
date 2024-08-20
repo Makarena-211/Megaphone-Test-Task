@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import random
+import sqlite3
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -11,7 +12,7 @@ async def client_task(client_id):
     for i in range(5):
         message = f"Client {client_id} message {i + 1}"
         logger.info(f'Sending: {message}')
-        writer.write(message.encode())
+        writer.write(message.encode('utf-8'))
         await writer.drain()
         
         data = await reader.read(100)
